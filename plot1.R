@@ -1,0 +1,5 @@
+DT<-read.delim(file.choose(),sep = ";")
+DT$Global_active_power<-as.numeric(DT$Global_active_power)
+png('plot1.png',height = 480,width = 480)
+hist((DT$Global_active_power/1000),col='red',breaks = c(15),main='Global Active Power',xlab = 'Global Active Power (kilowatts)')
+dev.off()
