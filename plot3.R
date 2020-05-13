@@ -15,41 +15,26 @@ DT$Time<-hour(DT$Time)
 library(dplyr)
 DT2<-DT %>%
   group_by(Date, Time) %>% 
-  summarise_at(vars("Sub_metering_1"), mean)
+  summarise_all(mean,na.rm=T)
 DayHour<-paste(DT2$Date,DT2$Time)
-DF<-as.data.frame(list(DH=DayHour,Kw=DT2$Sub_metering_1))
+DF<-as.data.frame(list(DH=DayHour,GAP=DT2$Global_active_power,
+                       GRP=DT2$Global_reactive_power,VOL=DT2$Voltage,SM1=DT2$Sub_metering_1,
+                       SM2=DT2$Sub_metering_2,SM3=DT2$Sub_metering_3))
 DF$DH<-factor(DF$DH,levels = dypp)
 
 rowloc<-c(grep('Thu',DF$DH),grep('Fri',DF$DH))
-
-DT3<-DT %>%
-  group_by(Date, Time) %>% 
-  summarise_at(vars("Sub_metering_2"), mean)
-DayHour2<-paste(DT3$Date,DT3$Time)
-DF2<-as.data.frame(list(DH=DayHour2,Kw=DT3$Sub_metering_2))
-DF2$DH<-factor(DF2$DH,levels = dypp)
-
-rowloc2<-c(grep('Thu',DF$DH),grep('Fri',DF2$DH))
-plot(as.numeric(DF2$DH)[rowloc2],DT3$Sub_metering_2[rowloc2], type='l',xaxt='none',xlab = "",ylab = 'Global Active Power (kilowatts)')
-DT4<-DT %>%
-  group_by(Date,Time) %>% 
-  summarise_all(mean,na.rm=T)
-DayHour3<-paste(DT4$Date,DT4$Time)
-DF3<-as.data.frame(list(DH=DayHour3,Kw=DT4$Sub_metering_3))
-DF3$DH<-factor(DF3$DH,levels = dypp)
-
-rowloc3<-c(grep('Thu',DF3$DH),grep('Fri',DF3$DH))
+par(mfrow=c(2,2))
 
 
 png('plot3.png',height = 480,width = 480)
 {
-  plot(as.numeric(DF$DH)[rowloc],DT2$Sub_metering_1[rowloc], type='l',xaxt='none',xlab = "",ylab = 'Energy sub metering',ylim = c(1,15))
+  plot(as.numeric(DF$DH)[rowloc],DT2$Sub_metering_1[rowloc], type='l',xaxt='none',xlab = "",
+       ylab = 'Energy sub metering',ylim = c(1,50))
   axis(1, seq(97,145,24),las=1,labels = c('Thu','Fri','Sat'))
-  lines(as.numeric(DF2$DH)[rowloc2],DT3$Sub_metering_2[rowloc2],col='red')
-  lines(as.numeric(DF3$DH)[rowloc3],DT4$Sub_metering_3[rowloc3],col='blue')
+  lines(as.numeric(DF$DH)[rowloc],DT$Sub_metering_2[rowloc],col='red')
+  lines(as.numeric(DF$DH)[rowloc],DT$Sub_metering_3[rowloc],col='blue')
   legend('topright',95,legend=c('Sub_metering_1','Sub_metering_1','Sub_metering_3'),
-         col = c('black','red','blue'),lty = c(1,1,1),cex=0.5)
-  
+         col = c('black','red','blue'),lty = c(1,1,1),cex=0.6)
 }
 
 dev.off()
